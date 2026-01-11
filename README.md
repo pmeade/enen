@@ -8,6 +8,9 @@ enen is a demo of runtime machine learning. The creature starts with random weig
 
 The entire brain that does this fits in **206 bytes**. That's smaller than this paragraph.
 
+![demo](https://github.com/user-attachments/assets/614045c2-e886-4fb3-85ad-4a392e8819b6)
+
+
 ## The Five Puzzles
 
 | Puzzle | The Problem | Network | Bytes |
