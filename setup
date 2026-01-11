@@ -1,0 +1,95 @@
+#!/bin/bash
+# enen setup script
+# Downloads and installs IntgrNN dependency
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+EXTERNAL_DIR="$SCRIPT_DIR/external"
+INTGRNN_DIR="$EXTERNAL_DIR/intgr_nn"
+
+# IntgrNN release configuration
+INTGRNN_REPO="pmeade/intgr_nn"
+INTGRNN_VERSION="${INTGRNN_VERSION:-latest}"
+
+echo "enen setup"
+echo "=========="
+echo
+
+# Check if already installed
+if [ -d "$INTGRNN_DIR/include" ] && [ -f "$INTGRNN_DIR/lib/libintgr_nn.a" ]; then
+    echo "IntgrNN already installed at $INTGRNN_DIR"
+    echo "Remove external/intgr_nn to reinstall."
+    exit 0
+fi
+
+mkdir -p "$EXTERNAL_DIR"
+
+# Try to download from GitHub release
+echo "Fetching IntgrNN..."
+
+if command -v gh &> /dev/null; then
+    echo "Using GitHub CLI to download release..."
+
+    if [ "$INTGRNN_VERSION" = "latest" ]; then
+        RELEASE_TAG=$(gh release view --repo "$INTGRNN_REPO" --json tagName -q .tagName 2>/dev/null || echo "")
+    else
+        RELEASE_TAG="$INTGRNN_VERSION"
+    fi
+
+    if [ -n "$RELEASE_TAG" ]; then
+        echo "Downloading IntgrNN $RELEASE_TAG..."
+        TEMP_DIR=$(mktemp -d)
+
+        if gh release download "$RELEASE_TAG" --repo "$INTGRNN_REPO" --pattern "intgr_nn-*.tar.gz" --dir "$TEMP_DIR" 2>/dev/null; then
+            TARBALL=$(ls "$TEMP_DIR"/intgr_nn-*.tar.gz 2>/dev/null | head -1)
+            if [ -n "$TARBALL" ]; then
+                echo "Extracting..."
+                tar -xzf "$TARBALL" -C "$EXTERNAL_DIR"
+                rm -rf "$TEMP_DIR"
+                echo "IntgrNN installed successfully."
+                exit 0
+            fi
+        fi
+
+        rm -rf "$TEMP_DIR"
+    fi
+
+    echo "No release found. Trying to clone repository..."
+
+    if gh repo clone "$INTGRNN_REPO" "$INTGRNN_DIR" -- --depth 1 2>/dev/null; then
+        # Build if needed
+        if [ -f "$INTGRNN_DIR/CMakeLists.txt" ] && [ ! -f "$INTGRNN_DIR/lib/libintgr_nn.a" ]; then
+            echo "Building IntgrNN..."
+            mkdir -p "$INTGRNN_DIR/build"
+            cmake -S "$INTGRNN_DIR" -B "$INTGRNN_DIR/build" -DCMAKE_BUILD_TYPE=Release
+            cmake --build "$INTGRNN_DIR/build" -j$(nproc)
+            mkdir -p "$INTGRNN_DIR/lib"
+            cp "$INTGRNN_DIR/build/libintgr_nn.a" "$INTGRNN_DIR/lib/"
+        fi
+        echo "IntgrNN installed successfully."
+        exit 0
+    fi
+fi
+
+# Manual instructions if automatic methods fail
+echo
+echo "ERROR: Could not automatically install IntgrNN."
+echo
+echo "IntgrNN is a separate library with its own license."
+echo "To install manually:"
+echo
+echo "  Option 1: Download a release"
+echo "    1. Visit https://github.com/pmeade/intgr_nn/releases"
+echo "    2. Download intgr_nn-<version>.tar.gz"
+echo "    3. Extract to external/intgr_nn/"
+echo
+echo "  Option 2: Clone (requires access)"
+echo "    gh repo clone pmeade/intgr_nn external/intgr_nn"
+echo
+echo "Required structure:"
+echo "  external/intgr_nn/"
+echo "    include/intgr_nn/intgr_nn.h"
+echo "    lib/libintgr_nn.a"
+echo
+exit 1
