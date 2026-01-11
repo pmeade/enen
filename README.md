@@ -1,80 +1,64 @@
 # enen
 
-A tiny creature learns to solve puzzles using a neural network small enough to fit in a tweet.
+A small creature learns to solve five puzzles using neural networks that fit in 206 bytes.
 
 ## What This Is
 
-enen is a demo showing real machine learning in action. You watch a small creature:
+enen is a demo of runtime machine learning. The creature starts with random weights — no pre-training, no loaded answers. Each trial, it guesses, gets feedback, and retrains on everything it remembers. After a few tries, the mistakes stop repeating.
 
-1. Start knowing nothing
-2. Guess answers to puzzles
-3. Get feedback (right or wrong)
-4. Update its brain (backpropagation)
-5. Eventually figure out the pattern
-
-No pre-training. No tricks. Just a tiny network learning from scratch.
+The entire brain that does this fits in **206 bytes**. That's smaller than this paragraph.
 
 ## The Five Puzzles
 
-| Puzzle | What enen Learns |
-|--------|------------------|
-| Size | Ignore distractions (color doesn't matter) |
-| Exceptions | Rules have exceptions (blue squares are safe) |
-| Context | The answer depends on context (check the light) |
-| Order | Sequence matters (A then B) |
-| Everything | Combine multiple skills |
+| Puzzle | The Problem | Network | Bytes |
+|--------|-------------|---------|-------|
+| Size | Bigger mushroom is safe; color is noise | 4→8→1 | 49 |
+| Exceptions | Circles safe, squares dangerous — except blue squares | 4→8→1 | 49 |
+| Context | Light ON = go left, Light OFF = go right (XOR problem) | 2→4→1 | 17 |
+| Order | Press A then B; only input is last key pressed | 1→4→2 | 18 |
+| Everything | Light ON = pick bigger, Light OFF = pick smaller | 3→8→4→1 | 73 |
 
-## Brain Size
+Each puzzle teaches a different skill: ignoring irrelevant features, learning exceptions, using context, responding to history, and combining abilities.
 
-enen's entire neural network is under 200 bytes. That's smaller than this paragraph.
+## Why Integer Neural Networks?
 
-The demo uses [IntgrNN](https://github.com/pmeade/intgr_nn), an 8-bit integer neural network library designed for embedded systems.
+The demo uses [IntgrNN](https://github.com/pmeade/intgr_nn), an 8-bit integer neural network library.
+
+**Size**: Each parameter is one byte. All five networks total 206 bytes — small enough to live in L1 cache.
+
+**Speed**: Integer math is fast. A forward pass takes single-digit microseconds. Learning fits comfortably in a 16ms frame budget.
+
+**Determinism**: Integer operations produce identical results across platforms. Same seed, same weights. Same inputs, same outputs. Same learning, same behavior.
+
+For game developers, this opens a new design space: agents that learn during play, behavior that adapts to the player, systems that are fully deterministic and debuggable but still surprising.
 
 ## Building
-
-### Prerequisites
-
-- C++17 compiler (GCC 7+ or Clang 5+)
-- CMake 3.14+
-- GitHub CLI (`gh`) for automatic setup
-
-### Setup
 
 ```bash
 git clone https://github.com/pmeade/enen.git
 cd enen
-./setup
-```
-
-The setup script downloads [IntgrNN](https://github.com/pmeade/intgr_nn), which is required to build enen.
-
-### Build
-
-```bash
+./setup                      # Downloads IntgrNN
 mkdir build && cd build
-cmake ..
-make
+cmake .. && make
 ```
 
-### Run
+Requires: C++17 compiler, CMake 3.14+, GitHub CLI (`gh`)
+
+## Running
 
 ```bash
 ./enen           # Interactive demo
-./enen-autorun   # Auto-run for video recording (asciinema format)
+./enen-autorun   # Auto-run for video recording (asciinema v2 format)
 ```
 
-## Video Recording
-
-The `enen-autorun` executable outputs [asciinema v2](https://github.com/asciinema/asciinema/blob/develop/doc/asciicast-v2.md) format:
-
+Video recording:
 ```bash
 ./enen-autorun > demo.cast
-agg demo.cast demo.gif    # Convert to GIF
-agg demo.cast demo.mp4    # Convert to MP4
+agg demo.cast demo.mp4
 ```
 
 ## License
 
 enen is released under the [MIT License](LICENSE).
 
-**Note:** enen depends on [IntgrNN](https://github.com/pmeade/intgr_nn), which has its own license. See the IntgrNN repository for licensing details.
+enen depends on [IntgrNN](https://github.com/pmeade/intgr_nn), which has its own license. See the IntgrNN repository for details.
