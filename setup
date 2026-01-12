@@ -9,7 +9,7 @@ EXTERNAL_DIR="$SCRIPT_DIR/external"
 INTGRNN_DIR="$EXTERNAL_DIR/intgr_nn"
 
 # IntgrNN release configuration
-INTGRNN_REPO="pmeade/intgr_nn"
+INTGRNN_REPO="double-star-games/intgr_nn"
 INTGRNN_VERSION="${INTGRNN_VERSION:-latest}"
 
 echo "enen setup"
@@ -54,38 +54,18 @@ if command -v gh &> /dev/null; then
 
         rm -rf "$TEMP_DIR"
     fi
-
-    echo "No release found. Trying to clone repository..."
-
-    if gh repo clone "$INTGRNN_REPO" "$INTGRNN_DIR" -- --depth 1 2>/dev/null; then
-        # Build if needed
-        if [ -f "$INTGRNN_DIR/CMakeLists.txt" ] && [ ! -f "$INTGRNN_DIR/lib/libintgr_nn.a" ]; then
-            echo "Building IntgrNN..."
-            mkdir -p "$INTGRNN_DIR/build"
-            cmake -S "$INTGRNN_DIR" -B "$INTGRNN_DIR/build" -DCMAKE_BUILD_TYPE=Release
-            cmake --build "$INTGRNN_DIR/build" -j$(nproc)
-            mkdir -p "$INTGRNN_DIR/lib"
-            cp "$INTGRNN_DIR/build/libintgr_nn.a" "$INTGRNN_DIR/lib/"
-        fi
-        echo "IntgrNN installed successfully."
-        exit 0
-    fi
 fi
 
-# Manual instructions if automatic methods fail
+# Manual instructions if automatic download fails
 echo
 echo "ERROR: Could not automatically install IntgrNN."
 echo
 echo "IntgrNN is a separate library with its own license."
 echo "To install manually:"
 echo
-echo "  Option 1: Download a release"
-echo "    1. Visit https://github.com/pmeade/intgr_nn/releases"
-echo "    2. Download intgr_nn-<version>.tar.gz"
-echo "    3. Extract to external/intgr_nn/"
-echo
-echo "  Option 2: Clone (requires access)"
-echo "    gh repo clone pmeade/intgr_nn external/intgr_nn"
+echo "  1. Visit https://github.com/double-star-games/intgr_nn/releases"
+echo "  2. Download intgr_nn-<version>.tar.gz"
+echo "  3. Extract to external/intgr_nn/"
 echo
 echo "Required structure:"
 echo "  external/intgr_nn/"
