@@ -52,6 +52,8 @@ cmake .. && make
 
 Requires: C++17 compiler, CMake 3.14+, GitHub CLI (`gh`)
 
+**Windows**: Run the setup script from Git Bash, not Command Prompt or PowerShell.
+
 ## Running
 
 ```bash

@@ -51,11 +51,13 @@ PLATFORM=$(detect_platform) || exit 1
 echo "Detected platform: $PLATFORM"
 echo
 
-# Check if already installed
-if [ -d "$INTGRNN_DIR/include" ] && [ -f "$INTGRNN_DIR/lib/libintgr_nn.a" ]; then
-    echo "IntgrNN already installed at $INTGRNN_DIR"
-    echo "Remove external/intgr_nn to reinstall."
-    exit 0
+# Check if already installed (Windows uses .lib, Unix uses .a)
+if [ -d "$INTGRNN_DIR/include" ]; then
+    if [ -f "$INTGRNN_DIR/lib/libintgr_nn.a" ] || [ -f "$INTGRNN_DIR/lib/intgr_nn.lib" ]; then
+        echo "IntgrNN already installed at $INTGRNN_DIR"
+        echo "Remove external/intgr_nn to reinstall."
+        exit 0
+    fi
 fi
 
 mkdir -p "$EXTERNAL_DIR"
@@ -76,18 +78,30 @@ if command -v gh &> /dev/null; then
         echo "Downloading IntgrNN $RELEASE_TAG for $PLATFORM..."
         TEMP_DIR=$(mktemp -d)
 
-        # Construct platform-specific pattern
-        PATTERN="intgr_nn-${PLATFORM}.tar.gz"
+        # Construct platform-specific pattern (Windows uses .zip, others use .tar.gz)
+        if [[ "$PLATFORM" == windows-* ]]; then
+            PATTERN="intgr_nn-${PLATFORM}.zip"
+        else
+            PATTERN="intgr_nn-${PLATFORM}.tar.gz"
+        fi
 
         if gh release download "$RELEASE_TAG" --repo "$INTGRNN_REPO" --pattern "$PATTERN" --dir "$TEMP_DIR" 2>/dev/null; then
-            TARBALL="$TEMP_DIR/$PATTERN"
-            if [ -f "$TARBALL" ]; then
+            ARCHIVE="$TEMP_DIR/$PATTERN"
+            if [ -f "$ARCHIVE" ]; then
                 echo "Extracting..."
                 mkdir -p "$INTGRNN_DIR"
-                tar -xzf "$TARBALL" -C "$INTGRNN_DIR"
+                if [[ "$PLATFORM" == windows-* ]]; then
+                    # unzip may warn about backslashes in Windows-created zips; ignore warnings
+                    unzip -q "$ARCHIVE" -d "$INTGRNN_DIR" || true
+                else
+                    tar -xzf "$ARCHIVE" -C "$INTGRNN_DIR"
+                fi
                 rm -rf "$TEMP_DIR"
-                echo "IntgrNN installed successfully."
-                exit 0
+                # Verify extraction succeeded
+                if [ -d "$INTGRNN_DIR/include" ]; then
+                    echo "IntgrNN installed successfully."
+                    exit 0
+                fi
             fi
         fi
 
@@ -104,12 +118,20 @@ echo "IntgrNN is a separate library with its own license."
 echo "To install manually:"
 echo
 echo "  1. Visit https://github.com/double-star-games/intgr_nn/releases"
-echo "  2. Download intgr_nn-${PLATFORM}.tar.gz"
+if [[ "$PLATFORM" == windows-* ]]; then
+    echo "  2. Download intgr_nn-${PLATFORM}.zip"
+else
+    echo "  2. Download intgr_nn-${PLATFORM}.tar.gz"
+fi
 echo "  3. Extract to external/intgr_nn/"
 echo
 echo "Required structure:"
 echo "  external/intgr_nn/"
 echo "    include/intgr_nn/intgr_nn.h"
-echo "    lib/libintgr_nn.a"
+if [[ "$PLATFORM" == windows-* ]]; then
+    echo "    lib/intgr_nn.lib"
+else
+    echo "    lib/libintgr_nn.a"
+fi
 echo
 exit 1
