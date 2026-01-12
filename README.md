@@ -42,6 +42,8 @@ For game developers, this opens a new design space: agents that learn during pla
 
 ## Building
 
+### Linux / macOS
+
 ```bash
 git clone https://github.com/pmeade/enen.git
 cd enen
@@ -50,15 +52,30 @@ mkdir build && cd build
 cmake .. && make
 ```
 
-Requires: C++17 compiler, CMake 3.14+, GitHub CLI (`gh`)
+### Windows
 
-**Windows**: Run the setup script from Git Bash, not Command Prompt or PowerShell.
+```powershell
+git clone https://github.com/pmeade/enen.git
+cd enen
+.\setup.bat                  # Downloads IntgrNN
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
+
+Requires: C++17 compiler, CMake 3.15+, GitHub CLI (`gh`)
 
 ## Running
 
 ```bash
+# Linux / macOS
 ./enen           # Interactive demo
 ./enen-autorun   # Auto-run for video recording (asciinema v2 format)
+
+# Windows (from build directory)
+.\Release\enen.exe
+.\Release\enen-autorun.exe
 ```
 
 Video recording:

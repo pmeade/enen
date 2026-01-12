@@ -15,13 +15,39 @@
 #include "puzzles.hpp"
 #include "renderer.hpp"
 #include <cstdio>
+#include <ctime>
+
+#ifdef _WIN32
+#include <conio.h>
+#include <windows.h>
+#else
 #include <termios.h>
 #include <unistd.h>
-#include <ctime>
+#endif
 
 using namespace enen;
 
 // Terminal input handling
+#ifdef _WIN32
+
+void enableRawMode() {
+    // Windows console is already in a suitable mode for _getch()
+}
+
+void disableRawMode() {
+    // Nothing to restore on Windows
+}
+
+char readKey() {
+    if (_kbhit()) {
+        return static_cast<char>(_getch());
+    }
+    Sleep(100);  // 100ms polling interval
+    return 0;
+}
+
+#else
+
 static termios orig_termios;
 
 void enableRawMode() {
@@ -42,6 +68,8 @@ char readKey() {
     read(STDIN_FILENO, &c, 1);
     return c;
 }
+
+#endif
 
 // Demo state
 struct DemoState {
