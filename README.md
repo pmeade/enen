@@ -10,6 +10,11 @@ The entire brain that does this fits in **206 bytes**. That's smaller than this 
 
 ![demo](https://github.com/user-attachments/assets/614045c2-e886-4fb3-85ad-4a392e8819b6)
 
+> **Note**
+>
+> This repository is an educational demonstration and showcase.
+> It does not contain the IntgrNN engine or its proprietary learning algorithms.
+> IntgrNN is a separate product with its own licensing terms.
 
 ## The Five Puzzles
 
@@ -25,7 +30,7 @@ Each puzzle teaches a different skill: ignoring irrelevant features, learning ex
 
 ## Why Integer Neural Networks?
 
-The demo uses [IntgrNN](https://github.com/pmeade/intgr_nn), an 8-bit integer neural network library.
+The demo uses [IntgrNN](https://github.com/double-star-games/intgr_nn), an 8-bit integer neural network library.
 
 **Size**: Each parameter is one byte. All five networks total 206 bytes — small enough to live in L1 cache.
 
