@@ -45,7 +45,8 @@ if command -v gh &> /dev/null; then
             TARBALL=$(ls "$TEMP_DIR"/intgr_nn-*.tar.gz 2>/dev/null | head -1)
             if [ -n "$TARBALL" ]; then
                 echo "Extracting..."
-                tar -xzf "$TARBALL" -C "$EXTERNAL_DIR"
+                mkdir -p "$INTGRNN_DIR"
+                tar -xzf "$TARBALL" -C "$INTGRNN_DIR"
                 rm -rf "$TEMP_DIR"
                 echo "IntgrNN installed successfully."
                 exit 0
