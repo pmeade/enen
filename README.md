@@ -64,4 +64,4 @@ agg demo.cast demo.mp4
 
 enen is released under the [MIT License](LICENSE).
 
-enen depends on [IntgrNN](https://github.com/pmeade/intgr_nn), which has its own license. See the IntgrNN repository for details.
+enen depends on [IntgrNN](https://github.com/double-star-games/intgr_nn), which has its own license. See the IntgrNN repository for details.
