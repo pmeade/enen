@@ -16,6 +16,41 @@ echo "enen setup"
 echo "=========="
 echo
 
+# Detect platform
+detect_platform() {
+    local os arch
+
+    case "$(uname -s)" in
+        Linux*)  os="linux" ;;
+        Darwin*) os="macos" ;;
+        MINGW*|MSYS*|CYGWIN*) os="windows" ;;
+        *)
+            echo "Unsupported OS: $(uname -s)"
+            return 1
+            ;;
+    esac
+
+    case "$(uname -m)" in
+        x86_64|amd64) arch="x86_64" ;;
+        aarch64|arm64) arch="arm64" ;;
+        *)
+            echo "Unsupported architecture: $(uname -m)"
+            return 1
+            ;;
+    esac
+
+    # Windows uses different naming
+    if [ "$os" = "windows" ]; then
+        arch="x64"
+    fi
+
+    echo "${os}-${arch}"
+}
+
+PLATFORM=$(detect_platform) || exit 1
+echo "Detected platform: $PLATFORM"
+echo
+
 # Check if already installed
 if [ -d "$INTGRNN_DIR/include" ] && [ -f "$INTGRNN_DIR/lib/libintgr_nn.a" ]; then
     echo "IntgrNN already installed at $INTGRNN_DIR"
@@ -38,12 +73,15 @@ if command -v gh &> /dev/null; then
     fi
 
     if [ -n "$RELEASE_TAG" ]; then
-        echo "Downloading IntgrNN $RELEASE_TAG..."
+        echo "Downloading IntgrNN $RELEASE_TAG for $PLATFORM..."
         TEMP_DIR=$(mktemp -d)
 
-        if gh release download "$RELEASE_TAG" --repo "$INTGRNN_REPO" --pattern "intgr_nn-*.tar.gz" --dir "$TEMP_DIR" 2>/dev/null; then
-            TARBALL=$(ls "$TEMP_DIR"/intgr_nn-*.tar.gz 2>/dev/null | head -1)
-            if [ -n "$TARBALL" ]; then
+        # Construct platform-specific pattern
+        PATTERN="intgr_nn-${PLATFORM}.tar.gz"
+
+        if gh release download "$RELEASE_TAG" --repo "$INTGRNN_REPO" --pattern "$PATTERN" --dir "$TEMP_DIR" 2>/dev/null; then
+            TARBALL="$TEMP_DIR/$PATTERN"
+            if [ -f "$TARBALL" ]; then
                 echo "Extracting..."
                 mkdir -p "$INTGRNN_DIR"
                 tar -xzf "$TARBALL" -C "$INTGRNN_DIR"
@@ -54,6 +92,7 @@ if command -v gh &> /dev/null; then
         fi
 
         rm -rf "$TEMP_DIR"
+        echo "No release found for platform: $PLATFORM"
     fi
 fi
 
@@ -65,7 +104,7 @@ echo "IntgrNN is a separate library with its own license."
 echo "To install manually:"
 echo
 echo "  1. Visit https://github.com/double-star-games/intgr_nn/releases"
-echo "  2. Download intgr_nn-<version>.tar.gz"
+echo "  2. Download intgr_nn-${PLATFORM}.tar.gz"
 echo "  3. Extract to external/intgr_nn/"
 echo
 echo "Required structure:"
